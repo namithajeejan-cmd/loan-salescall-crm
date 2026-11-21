@@ -1,0 +1,23 @@
+{% extends 'crm/base.html' %}
+{% block content %}
+<h2>Update call: {{ lead.name }}</h2>
+<p>Phone: {{ lead.phone }} | Loan type: {{ lead.loan_type }}</p>
+<form method="post">
+  {% csrf_token %}
+  <p>
+    <label>Outcome:</label>
+    <select name="outcome" required>
+      <option value="">-- choose --</option>
+      {% for value, label in choices %}
+      <option value="{{ value }}">{{ label }}</option>
+      {% endfor %}
+    </select>
+  </p>
+  <p>
+    <label>Remarks:</label><br>
+    <textarea name="remarks" rows="4" cols="40">{{ lead.remarks }}</textarea>
+  </p>
+  <button type="submit">Save call</button>
+</form>
+<p><a href="{% url 'staff_dashboard' %}">Back</a></p>
+{% endblock %}

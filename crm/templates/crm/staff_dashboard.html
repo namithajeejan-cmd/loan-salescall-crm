@@ -1,5 +1,22 @@
 {% extends 'crm/base.html' %}
 {% block content %}
 <h2>Staff Dashboard</h2>
-<p>Welcome, Your leads will appear here.</p>
+<p>Today's calls: <strong>{{ calls_today }} / {{ target }}</strong></p>
+<progress value="{{ percent }}" max="100"></progress> {{ percent }}%
+
+<h3>My Leads ({{ leads|length }})</h3>
+<table border="1" cellpadding="6">
+  <tr><th>Name</th><th>Phone</th><th>Loan type</th><th>Status</th><th>Action</th></tr>
+  {% for lead in leads %}
+  <tr>
+    <td>{{ lead.name }}</td>
+    <td>{{ lead.phone }}</td>
+    <td>{{ lead.loan_type }}</td>
+    <td>{{ lead.get_status_display }}</td>
+    <td><a href="{% url 'update_call' lead.id %}">Update call</a></td>
+  </tr>
+  {% empty %}
+  <tr><td colspan="5">No leads assigned yet.</td></tr>
+  {% endfor %}
+</table>
 {% endblock %}

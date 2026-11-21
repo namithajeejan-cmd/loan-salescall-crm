@@ -30,5 +30,6 @@ urlpatterns = [
     path('staff-portal/', views.staff_dashboard, name='staff_dashboard'),
     path('admin-portal/leads/upload/', views.upload_leads, name='upload_leads'),
     path('admin-portal/leads/distribute/', views.distribute_leads, name='distribute_leads'),
+    path('staff-portal/call/<int:lead_id>/', views.update_call, name='update_call'),
 ]
 

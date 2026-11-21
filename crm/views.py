@@ -7,8 +7,9 @@ import csv
 import re
 from datetime import date
 from django.contrib import messages
-from .models import Lead, User
-
+from .models import Lead, User, CallLog
+from django.shortcuts import get_object_or_404
+from django.utils import timezone
 
 def landing(request):
     if request.user.is_authenticated:
@@ -44,7 +45,38 @@ def admin_dashboard(request):
 
 @role_required('STAFF')
 def staff_dashboard(request):
-    return render(request, 'crm/staff_dashboard.html')
+    leads = Lead.objects.filter(assigned_to=request.user).order_by('status', 'name')
+    calls_today = CallLog.objects.filter(
+        staff=request.user, created_at__date=timezone.localdate()
+    ).count()
+    target = request.user.daily_target
+    percent = min(100, int(calls_today * 100 / target)) if target else 0
+    return render(request, 'crm/staff_dashboard.html', {
+        'leads': leads,
+        'calls_today': calls_today,
+        'target': target,
+        'percent': percent,
+    })
+
+
+@role_required('STAFF')
+def update_call(request, lead_id):
+    # only the lead's owner can open it, so staff can't touch other people's leads
+    lead = get_object_or_404(Lead, id=lead_id, assigned_to=request.user)
+    choices = [c for c in Lead.STATUS_CHOICES if c[0] != 'NEW']
+    if request.method == 'POST':
+        outcome = request.POST.get('outcome')
+        remarks = request.POST.get('remarks', '').strip()
+        if outcome in [c[0] for c in choices]:
+            CallLog.objects.create(lead=lead, staff=request.user,
+                                   outcome=outcome, remarks=remarks)
+            lead.status = outcome
+            lead.remarks = remarks
+            lead.save()
+            messages.success(request, f'Call saved for {lead.name}.')
+            return redirect('staff_dashboard')
+        messages.error(request, 'Please choose a call outcome.')
+    return render(request, 'crm/update_call.html', {'lead': lead, 'choices': choices})
 
 @role_required('ADMIN')
 def upload_leads(request):
