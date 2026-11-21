@@ -1,0 +1,23 @@
+{% extends 'crm/base.html' %}
+{% block content %}
+<h2>Employees</h2>
+<p><a href="{% url 'admin_dashboard' %}">Back to dashboard</a> | <a href="{% url 'add_staff' %}">Add employee</a></p>
+<table border="1" cellpadding="6">
+  <tr><th>Username</th><th>Daily target</th><th>Status</th><th>Action</th></tr>
+  {% for s in staff %}
+  <tr>
+    <td>{{ s.username }}</td>
+    <td>{{ s.daily_target }}</td>
+    <td>{% if s.is_active %}Active{% else %}Inactive{% endif %}</td>
+    <td>
+      <form method="post" action="{% url 'toggle_staff' s.id %}">
+        {% csrf_token %}
+        <button type="submit">{% if s.is_active %}Deactivate{% else %}Activate{% endif %}</button>
+      </form>
+    </td>
+  </tr>
+  {% empty %}
+  <tr><td colspan="4">No employees yet.</td></tr>
+  {% endfor %}
+</table>
+{% endblock %}

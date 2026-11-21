@@ -212,3 +212,42 @@ def update_application(request, app_id):
         messages.error(request, 'Invalid status.')
     return render(request, 'crm/update_application.html',
                   {'app': app, 'statuses': LoanApplication.STATUS_CHOICES})
+
+
+@role_required('ADMIN')
+def staff_list(request):
+    staff = User.objects.filter(role='STAFF').order_by('username')
+    return render(request, 'crm/staff_list.html', {'staff': staff})
+
+
+@role_required('ADMIN')
+def add_staff(request):
+    if request.method == 'POST':
+        username = request.POST.get('username', '').strip()
+        password = request.POST.get('password', '')
+        try:
+            target = int(request.POST.get('daily_target') or 100)
+        except ValueError:
+            target = 0
+        if not username or len(password) < 6:
+            messages.error(request, 'Enter a username and a password of at least 6 characters.')
+        elif User.objects.filter(username=username).exists():
+            messages.error(request, 'That username already exists.')
+        elif target < 1:
+            messages.error(request, 'Daily target must be at least 1.')
+        else:
+            User.objects.create_user(username=username, password=password,
+                                     role='STAFF', daily_target=target)
+            messages.success(request, f'Staff {username} added.')
+            return redirect('staff_list')
+    return render(request, 'crm/add_staff.html')
+
+
+@role_required('ADMIN')
+def toggle_staff(request, user_id):
+    if request.method == 'POST':
+        s = get_object_or_404(User, id=user_id, role='STAFF')
+        s.is_active = not s.is_active
+        s.save()
+        messages.success(request, f'{s.username} is now {"active" if s.is_active else "inactive"}.')
+    return redirect('staff_list')

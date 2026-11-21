@@ -1,0 +1,12 @@
+{% extends 'crm/base.html' %}
+{% block content %}
+<h2>Add employee</h2>
+<form method="post">
+  {% csrf_token %}
+  <p><label>Username:</label><br><input type="text" name="username" required></p>
+  <p><label>Password (min 6 characters):</label><br><input type="password" name="password" required></p>
+  <p><label>Daily call target:</label><br><input type="number" name="daily_target" value="100" min="1"></p>
+  <button type="submit">Add</button>
+</form>
+<p><a href="{% url 'staff_list' %}">Back</a></p>
+{% endblock %}
