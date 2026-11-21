@@ -1,0 +1,20 @@
+{% extends 'crm/base.html' %}
+{% block content %}
+<h2>Upload and Distribute Leads</h2>
+<p><a href="{% url 'admin_dashboard' %}">Back to dashboard</a></p>
+
+<h3>1. Upload CSV</h3>
+<p>The file needs these columns: <code>name,phone,loan_type</code></p>
+<form method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+  <input type="file" name="csv_file" accept=".csv" required>
+  <button type="submit">Upload</button>
+</form>
+
+<h3>2. Distribute</h3>
+<p>Unassigned leads: <strong>{{ unassigned }}</strong></p>
+<form method="post" action="{% url 'distribute_leads' %}">
+  {% csrf_token %}
+  <button type="submit">Distribute equally among active staff</button>
+</form>
+{% endblock %}

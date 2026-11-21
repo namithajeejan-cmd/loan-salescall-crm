@@ -28,4 +28,7 @@ urlpatterns = [
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('admin-portal/', views.admin_dashboard, name='admin_dashboard'),
     path('staff-portal/', views.staff_dashboard, name='staff_dashboard'),
+    path('admin-portal/leads/upload/', views.upload_leads, name='upload_leads'),
+    path('admin-portal/leads/distribute/', views.distribute_leads, name='distribute_leads'),
 ]
+
