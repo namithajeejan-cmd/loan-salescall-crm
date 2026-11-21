@@ -38,6 +38,7 @@ urlpatterns = [
     path('admin-portal/staff/', views.staff_list, name='staff_list'),
     path('admin-portal/staff/add/', views.add_staff, name='add_staff'),
     path('admin-portal/staff/<int:user_id>/toggle/', views.toggle_staff, name='toggle_staff'),
+    path('m/', views.mobile_view, name='mobile'),
 
 ]
 

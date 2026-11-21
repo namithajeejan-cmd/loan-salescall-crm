@@ -251,3 +251,7 @@ def toggle_staff(request, user_id):
         s.save()
         messages.success(request, f'{s.username} is now {"active" if s.is_active else "inactive"}.')
     return redirect('staff_list')
+
+
+def mobile_view(request):
+    return render(request, 'crm/mobile.html')
