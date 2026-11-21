@@ -59,3 +59,24 @@ class FollowUp(models.Model):
 
     def __str__(self):
         return f"{self.lead} on {self.follow_up_date}"
+
+class LoanApplication(models.Model):
+    STATUS_CHOICES = [
+        ('SUBMITTED', 'Submitted'),
+        ('UNDER_REVIEW', 'Under Review'),
+        ('APPROVED', 'Approved'),
+        ('DISBURSED', 'Disbursed'),
+        ('CLOSED', 'Closed'),
+        ('REJECTED', 'Rejected'),
+    ]
+    lead = models.ForeignKey(Lead, on_delete=models.CASCADE, related_name='applications')
+    staff = models.ForeignKey(User, on_delete=models.CASCADE, related_name='applications')
+    bank_name = models.CharField(max_length=100)
+    amount = models.DecimalField(max_digits=12, decimal_places=2)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='SUBMITTED')
+    remarks = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.lead.name} - {self.bank_name} ({self.status})"

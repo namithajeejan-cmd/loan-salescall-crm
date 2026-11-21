@@ -1,3 +1,4 @@
+from decimal import Decimal, InvalidOperation
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
@@ -7,7 +8,7 @@ import csv
 import re
 from datetime import date
 from django.contrib import messages
-from .models import Lead, User, CallLog, FollowUp
+from .models import Lead, User, CallLog, FollowUp, LoanApplication
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
@@ -95,6 +96,35 @@ def update_call(request, lead_id):
             messages.success(request, f'Call saved for {lead.name}.')
             return redirect('staff_dashboard')
     return render(request, 'crm/update_call.html', {'lead': lead, 'choices': choices})
+
+@role_required('STAFF')
+def create_application(request, lead_id):
+    # only the owner's Interested leads can become applications
+    lead = get_object_or_404(Lead, id=lead_id, assigned_to=request.user, status='INTERESTED')
+    if request.method == 'POST':
+        bank_name = request.POST.get('bank_name', '').strip()
+        try:
+            amount = Decimal(request.POST.get('amount', ''))
+        except InvalidOperation:
+            amount = None
+        if not bank_name:
+            messages.error(request, 'Please enter the bank name.')
+        elif amount is None or amount <= 0:
+            messages.error(request, 'Please enter a valid loan amount.')
+        else:
+            LoanApplication.objects.create(
+                lead=lead, staff=request.user, bank_name=bank_name,
+                amount=amount, remarks=request.POST.get('remarks', '').strip(),
+            )
+            messages.success(request, f'Application created for {lead.name}.')
+            return redirect('my_applications')
+    return render(request, 'crm/create_application.html', {'lead': lead})
+
+
+@role_required('STAFF')
+def my_applications(request):
+    apps = LoanApplication.objects.filter(staff=request.user).select_related('lead').order_by('-created_at')
+    return render(request, 'crm/my_applications.html', {'apps': apps})
 
 @role_required('ADMIN')
 def upload_leads(request):

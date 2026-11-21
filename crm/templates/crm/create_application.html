@@ -1,0 +1,13 @@
+{% extends 'crm/base.html' %}
+{% block content %}
+<h2>New loan application: {{ lead.name }}</h2>
+<p>Phone: {{ lead.phone }} | Loan type: {{ lead.loan_type }}</p>
+<form method="post">
+  {% csrf_token %}
+  <p><label>Bank name:</label><br><input type="text" name="bank_name" required></p>
+  <p><label>Loan amount:</label><br><input type="number" name="amount" step="0.01" min="1" required></p>
+  <p><label>Remarks:</label><br><textarea name="remarks" rows="3" cols="40"></textarea></p>
+  <button type="submit">Create application</button>
+</form>
+<p><a href="{% url 'staff_dashboard' %}">Back</a></p>
+{% endblock %}

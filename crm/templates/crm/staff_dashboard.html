@@ -3,6 +3,7 @@
 <h2>Staff Dashboard</h2>
 <p>Today's calls: <strong>{{ calls_today }} / {{ target }}</strong></p>
 <progress value="{{ percent }}" max="100"></progress> {{ percent }}%
+<p><a href="{% url 'my_applications' %}">My Loan Applications</a></p>
 <h3>Follow-ups due ({{ followups|length }})</h3>
 <table border="1" cellpadding="6">
   <tr><th>Date</th><th>Name</th><th>Phone</th><th>Action</th></tr>
@@ -26,7 +27,10 @@
     <td>{{ lead.phone }}</td>
     <td>{{ lead.loan_type }}</td>
     <td>{{ lead.get_status_display }}</td>
-    <td><a href="{% url 'update_call' lead.id %}">Update call</a></td>
+    <td>
+        <a href="{% url 'update_call' lead.id %}">Update call</a>
+        {% if lead.status == 'INTERESTED' %} | <a href="{% url 'create_application' lead.id %}">Create application</a>{% endif %}
+    </td>
   </tr>
   {% empty %}
   <tr><td colspan="5">No leads assigned yet.</td></tr>
