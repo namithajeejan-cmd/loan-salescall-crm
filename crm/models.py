@@ -48,3 +48,14 @@ class CallLog(models.Model):
 
     def __str__(self):
         return f"{self.staff} called {self.lead} on {self.created_at:%d-%m-%Y}"
+
+
+class FollowUp(models.Model):
+    lead = models.ForeignKey(Lead, on_delete=models.CASCADE, related_name='followups')
+    staff = models.ForeignKey(User, on_delete=models.CASCADE, related_name='followups')
+    follow_up_date = models.DateField()
+    done = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.lead} on {self.follow_up_date}"

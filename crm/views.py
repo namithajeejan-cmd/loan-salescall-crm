@@ -7,7 +7,7 @@ import csv
 import re
 from datetime import date
 from django.contrib import messages
-from .models import Lead, User, CallLog
+from .models import Lead, User, CallLog, FollowUp
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
@@ -51,31 +51,49 @@ def staff_dashboard(request):
     ).count()
     target = request.user.daily_target
     percent = min(100, int(calls_today * 100 / target)) if target else 0
+    followups = FollowUp.objects.filter(
+        staff=request.user, done=False, follow_up_date__lte=timezone.localdate()
+    ).select_related('lead').order_by('follow_up_date')
     return render(request, 'crm/staff_dashboard.html', {
         'leads': leads,
         'calls_today': calls_today,
         'target': target,
         'percent': percent,
+        'followups': followups,
     })
-
 
 @role_required('STAFF')
 def update_call(request, lead_id):
-    # only the lead's owner can open it, so staff can't touch other people's leads
     lead = get_object_or_404(Lead, id=lead_id, assigned_to=request.user)
     choices = [c for c in Lead.STATUS_CHOICES if c[0] != 'NEW']
     if request.method == 'POST':
         outcome = request.POST.get('outcome')
         remarks = request.POST.get('remarks', '').strip()
-        if outcome in [c[0] for c in choices]:
+        date_text = request.POST.get('follow_up_date', '').strip()
+        follow_date = None
+        if date_text:
+            try:
+                follow_date = date.fromisoformat(date_text)
+            except ValueError:
+                messages.error(request, 'Invalid follow-up date.')
+                return render(request, 'crm/update_call.html', {'lead': lead, 'choices': choices})
+        if outcome not in [c[0] for c in choices]:
+            messages.error(request, 'Please choose a call outcome.')
+        elif outcome == 'FOLLOW_UP' and not follow_date:
+            messages.error(request, 'Please choose a follow-up date.')
+        else:
             CallLog.objects.create(lead=lead, staff=request.user,
                                    outcome=outcome, remarks=remarks)
             lead.status = outcome
             lead.remarks = remarks
             lead.save()
+            # this call completes any earlier pending follow-ups for this lead
+            FollowUp.objects.filter(lead=lead, done=False).update(done=True)
+            if follow_date and outcome != 'NOT_INTERESTED':
+                FollowUp.objects.create(lead=lead, staff=request.user,
+                                        follow_up_date=follow_date)
             messages.success(request, f'Call saved for {lead.name}.')
             return redirect('staff_dashboard')
-        messages.error(request, 'Please choose a call outcome.')
     return render(request, 'crm/update_call.html', {'lead': lead, 'choices': choices})
 
 @role_required('ADMIN')

@@ -17,6 +17,10 @@
     <label>Remarks:</label><br>
     <textarea name="remarks" rows="4" cols="40">{{ lead.remarks }}</textarea>
   </p>
+    <p>
+    <label>Follow-up date (needed for "Follow-up", optional otherwise):</label><br>
+    <input type="date" name="follow_up_date">
+  </p>
   <button type="submit">Save call</button>
 </form>
 <p><a href="{% url 'staff_dashboard' %}">Back</a></p>
