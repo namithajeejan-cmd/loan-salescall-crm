@@ -127,3 +127,6 @@ MAILERS = {
     },
 }
 AUTH_USER_MODEL = 'crm.User'
+LOGIN_URL = 'landing'
+LOGIN_REDIRECT_URL = 'home'
+LOGOUT_REDIRECT_URL = 'landing'

@@ -16,7 +16,16 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from django.contrib.auth import views as auth_views
+from crm import views
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('django-admin/', admin.site.urls),
+    path('', views.landing, name='landing'),
+    path('home/', views.home, name='home'),
+    path('login/admin/', views.portal_login, {'role': 'ADMIN'}, name='admin_login'),
+    path('login/staff/', views.portal_login, {'role': 'STAFF'}, name='staff_login'),
+    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
+    path('admin-portal/', views.admin_dashboard, name='admin_dashboard'),
+    path('staff-portal/', views.staff_dashboard, name='staff_dashboard'),
 ]

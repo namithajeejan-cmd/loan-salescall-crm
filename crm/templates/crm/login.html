@@ -1,0 +1,10 @@
+{% extends 'crm/base.html' %}
+{% block content %}
+<h2>{% if role == 'ADMIN' %}Admin{% else %}Staff{% endif %} Login</h2>
+<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit">Login</button>
+</form>
+<p><a href="{% url 'landing' %}">Back</a></p>
+{% endblock %}

@@ -1,0 +1,7 @@
+{% extends 'crm/base.html' %}
+{% block content %}
+<h1>Loan Sales &amp; Call Centre CRM</h1>
+<p>Please choose how you want to log in:</p>
+<p><a href="{% url 'admin_login' %}"><button>Admin Login</button></a></p>
+<p><a href="{% url 'staff_login' %}"><button>Staff Login</button></a></p>
+{% endblock %}
