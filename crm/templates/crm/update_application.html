@@ -1,0 +1,19 @@
+{% extends 'crm/base.html' %}
+{% block content %}
+<h2>Update application: {{ app.lead.name }}</h2>
+<p>Bank: {{ app.bank_name }} | Amount: {{ app.amount }}</p>
+<form method="post">
+  {% csrf_token %}
+  <p>
+    <label>Status:</label>
+    <select name="status">
+      {% for value, label in statuses %}
+      <option value="{{ value }}" {% if value == app.status %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </p>
+  <p><label>Remarks:</label><br><textarea name="remarks" rows="3" cols="40">{{ app.remarks }}</textarea></p>
+  <button type="submit">Save</button>
+</form>
+<p><a href="{% url 'applications_list' %}">Back</a></p>
+{% endblock %}

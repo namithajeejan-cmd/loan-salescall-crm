@@ -33,5 +33,7 @@ urlpatterns = [
     path('staff-portal/call/<int:lead_id>/', views.update_call, name='update_call'),
     path('staff-portal/apply/<int:lead_id>/', views.create_application, name='create_application'),
     path('staff-portal/applications/', views.my_applications, name='my_applications'),
+    path('admin-portal/applications/', views.applications_list, name='applications_list'),
+    path('admin-portal/applications/<int:app_id>/', views.update_application, name='update_application'),
 ]
 

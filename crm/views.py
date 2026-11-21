@@ -39,9 +39,6 @@ def home(request):
     return redirect('staff_dashboard')
 
 
-@role_required('ADMIN')
-def admin_dashboard(request):
-    return render(request, 'crm/admin_dashboard.html')
 
 
 @role_required('STAFF')
@@ -170,3 +167,48 @@ def distribute_leads(request):
                 count += 1
             messages.success(request, f'{count} leads distributed among {len(staff)} staff.')
     return redirect('upload_leads')
+
+
+@role_required('ADMIN')
+def admin_dashboard(request):
+    today = timezone.localdate()
+    staff_rows = []
+    for s in User.objects.filter(role='STAFF', is_active=True):
+        staff_rows.append({
+            'name': s.username,
+            'calls': CallLog.objects.filter(staff=s, created_at__date=today).count(),
+            'target': s.daily_target,
+            'leads': Lead.objects.filter(assigned_to=s).count(),
+            'interested': Lead.objects.filter(assigned_to=s, status='INTERESTED').count(),
+        })
+    context = {
+        'total_leads': Lead.objects.count(),
+        'unassigned': Lead.objects.filter(assigned_to__isnull=True).count(),
+        'calls_today': CallLog.objects.filter(created_at__date=today).count(),
+        'interested': Lead.objects.filter(status='INTERESTED').count(),
+        'applications': LoanApplication.objects.count(),
+        'staff_rows': staff_rows,
+    }
+    return render(request, 'crm/admin_dashboard.html', context)
+
+
+@role_required('ADMIN')
+def applications_list(request):
+    apps = LoanApplication.objects.select_related('lead', 'staff').order_by('-updated_at')
+    return render(request, 'crm/applications_list.html', {'apps': apps})
+
+
+@role_required('ADMIN')
+def update_application(request, app_id):
+    app = get_object_or_404(LoanApplication, id=app_id)
+    if request.method == 'POST':
+        status = request.POST.get('status')
+        if status in [c[0] for c in LoanApplication.STATUS_CHOICES]:
+            app.status = status
+            app.remarks = request.POST.get('remarks', '').strip()
+            app.save()
+            messages.success(request, 'Application updated.')
+            return redirect('applications_list')
+        messages.error(request, 'Invalid status.')
+    return render(request, 'crm/update_application.html',
+                  {'app': app, 'statuses': LoanApplication.STATUS_CHOICES})

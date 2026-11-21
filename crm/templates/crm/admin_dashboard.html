@@ -1,6 +1,32 @@
 {% extends 'crm/base.html' %}
 {% block content %}
 <h2>Admin Dashboard</h2>
-<p>Welcome, boss.</p>
-<p><a href="{% url 'upload_leads' %}">Upload and Distribute Leads</a></p>
+<p>
+  <a href="{% url 'upload_leads' %}">Upload and Distribute Leads</a> |
+  <a href="{% url 'applications_list' %}">Loan Applications</a>
+</p>
+
+<p>
+  Total leads: <strong>{{ total_leads }}</strong> |
+  Unassigned: <strong>{{ unassigned }}</strong> |
+  Calls today: <strong>{{ calls_today }}</strong> |
+  Interested: <strong>{{ interested }}</strong> |
+  Applications: <strong>{{ applications }}</strong>
+</p>
+
+<h3>Staff performance today</h3>
+<table border="1" cellpadding="6">
+  <tr><th>Staff</th><th>Calls today</th><th>Target</th><th>Leads</th><th>Interested</th></tr>
+  {% for r in staff_rows %}
+  <tr>
+    <td>{{ r.name }}</td>
+    <td>{{ r.calls }}</td>
+    <td>{{ r.target }}</td>
+    <td>{{ r.leads }}</td>
+    <td>{{ r.interested }}</td>
+  </tr>
+  {% empty %}
+  <tr><td colspan="5">No staff yet.</td></tr>
+  {% endfor %}
+</table>
 {% endblock %}
